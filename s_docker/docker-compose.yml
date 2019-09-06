@@ -1,0 +1,77 @@
+version: "3.1"
+
+services:
+  nginx:
+    container_name: "symfony"
+    build: "nginx/"
+    volumes:
+    - ../src:/var/www/html/data
+    - ./nginx/s.conf:/etc/nginx/conf.d/default.conf
+    networks:
+    - symf
+    - web
+    labels:
+    - "traefik.backend=loc-symfony-webserver"
+    - "traefik.enable=true"
+    - "traefik.docker.network=web"
+    - "traefik.frontend.rule=Host:symfony.local"
+    - "traefik.port=80"
+
+#  api:
+#    container_name: "hero_api"
+#    build: "nginx/"
+#    volumes:
+#    - ../src:/var/www/html/data
+#    - ./nginx/api_hero.conf:/etc/nginx/conf.d/default.conf
+#    networks:
+#    - symf
+#    - web
+#    labels:
+#    - "traefik.backend=loc-hero-api-webserver"
+#    - "traefik.enable=true"
+#    - "traefik.docker.network=web"
+#    - "traefik.frontend.rule=Host:api.hero.local"
+#    - "traefik.port=80"
+#  frontend:
+#    container_name: "ss_front"
+#    build: "nginx/"
+#    volumes:
+#    - ../src:/var/www/html/data
+#    - ./nginx/front_ss.conf:/etc/nginx/conf.d/default.conf
+#    networks:
+#    - symf
+#    - web
+#    labels:
+#    - "traefik.backend=loc-hero-frontend-webserver"
+#    - "traefik.enable=true"
+#    - "traefik.docker.network=web"
+#    - "traefik.frontend.rule=Host:hero.local"
+#    - "traefik.port=80"
+
+  php:
+    container_name: "symf_php"
+    build: "php/"
+    networks:
+    - symf
+    - web
+    volumes:
+    - ../src:/var/www/html/data
+    environment:
+      XDEBUG_CONFIG: "remote_host=192.168.3.109"
+
+  db:
+    image: mysql:5.7.6
+    networks:
+      - symf
+      - web
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./db:/var/lib/mysql
+
+
+networks:
+  symf:
+    driver: bridge
+  web:
+    external: true
